@@ -1,17 +1,23 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
+
 public class MatrixMultiplication {
 	
 	public static void printMatrix(int[][] M) {
 		int n = M.length;
 		for (int row=0; row<n; row++) {
 			for (int col=0; col<n; col++) {
-				System.out.print(M[row][col] + " ");
+				System.out.printf("% 3d", M[row][col]);
 			}
-			System.out.println();
+			System.out.println("");
 		}
 		System.out.println("--------");
 	}
 	
 	public static int[][] regularMM(int n, int[][] A, int[][] B) {
+
+		
 		int[][] AB = new int[n][n];	
 		for (int i=0; i<n; i++) {
 			for (int j=0; j<n; j++) {
@@ -29,10 +35,12 @@ public class MatrixMultiplication {
 		//printMatrix(B);
 		//System.out.println("=");
 		//printMatrix(AB);
+		
 		return AB;
 	}
 	
 	public static int[][] dacMM(int n, int[][] A, int[][] B) {
+		
 		int[][] AB = new int[n][n];
 		//3x3 or oddxodd matrix all you do is add an additional row and column
 		//ONLY IF ABOVE 2x2!
@@ -72,7 +80,7 @@ public class MatrixMultiplication {
 			int[][] BUR = new int[n/2][n/2]; //B Upper right
 			int[][] BBL = new int[n/2][n/2]; //B Bottom left
 			int[][] BBR = new int[n/2][n/2]; //B Bottom right
-			System.out.println("Splitting " + n + "x" + n + " matrix into " + n/2 + "x" + n/2);
+			//System.out.println("Splitting " + n + "x" + n + " matrix into " + n/2 + "x" + n/2);
 			//Assign values to each submatrix
 			//Might be able to combine for loops with matching starting/ending rows or cols
 			//Upper left
@@ -139,7 +147,7 @@ public class MatrixMultiplication {
 //			printMatrix(BBR);
 			
 			//Delegate work to recursive calls
-			System.out.println("Delegating work for " + n + "x" + n + " matrix...");
+			//System.out.println("Delegating work for " + n + "x" + n + " matrix...");
 			
 			int[][] CUL = AddSquareMatrix(dacMM(n/2, AUL, BUL), dacMM(n/2, AUR, BBL));
 			int[][] CUR = AddSquareMatrix(dacMM(n/2, AUL, BUR), dacMM(n/2, AUR, BBR));
@@ -147,7 +155,7 @@ public class MatrixMultiplication {
 			int[][] CBR = AddSquareMatrix(dacMM(n/2, ABL, BUR), dacMM(n/2, ABR, BBR));
 			
 			//Combine all of their work
-			System.out.println("Combining returned arrays from recursive calls");
+			//System.out.println("Combining returned arrays from recursive calls");
 			int[][] C = new int[n][n];
 			
 			//Fill in C's quadrants
@@ -195,17 +203,18 @@ public class MatrixMultiplication {
 				c_col = n/2;
 				c_row++;
 			}
-			System.out.println("Returning!");
+			//System.out.println("Returning!");
+			
 			return C;
 		}
 	}
 	
 	public static int[][] strassMM(int n, int[][] A, int[][] B) {
-		
+
 		
 		//Base case that matrix is 2x2 or 1x1
 		if (A.length <= 2 && B.length <= 2) {
-			System.out.println("Base case reached");
+			//System.out.println("Base case reached");
 			return regularMM(n, A, B); //If base case is 2x2
 		}
 		
@@ -228,7 +237,7 @@ public class MatrixMultiplication {
 				}
 				A = resizedA;
 				B = resizedB;
-				System.out.println("Resizing matrix from " + n + "x" + n + " to " + (n+1) + "x" + (n+1) );
+				//System.out.println("Resizing matrix from " + n + "x" + n + " to " + (n+1) + "x" + (n+1) );
 				n += 1;
 				//printMatrix(A); //---------------DEBUG
 				//printMatrix(B);
@@ -238,7 +247,7 @@ public class MatrixMultiplication {
 			
 			//Divide matrices		
 			//Make 4 submatrices for A and B
-			System.out.println("Still too big to solve easily. Splitting A and B into submatrices");
+			//System.out.println("Still too big to solve easily. Splitting A and B into submatrices");
 			int[][] AUL = new int[n/2][n/2]; //A Upper left
 			int[][] AUR = new int[n/2][n/2]; //A Upper right
 			int[][] ABL = new int[n/2][n/2]; //A Bottom left
@@ -321,7 +330,7 @@ public class MatrixMultiplication {
 			//Throw computed intermediate values into C to be 
 			//[C11,C12] Where C could be some 2x2, 4x4, or any other even length square matrix
 			//[C21,C22]
-			System.out.println("Making " + n + "x" + n + " C matrix");
+			//System.out.println("Making " + n + "x" + n + " C matrix");
 			int[][] CUL = AddSquareMatrix(SubSquareMatrix(M1, M5), AddSquareMatrix(M4, M7));
 			//System.out.println("CUL");
 			//printMatrix(CUL);
@@ -378,7 +387,8 @@ public class MatrixMultiplication {
 				c_row++;
 			}
 			
-			System.out.println("Returning C");
+			//System.out.println("Returning C");
+
 			return C;
 		}
 	}
@@ -427,30 +437,149 @@ public class MatrixMultiplication {
 				return C;
 	}
 	
+	static int[][] generateRandomMatrix(int n) {
+		int[][] M = new int[n][n];
+		for (int row=0; row<n; row++) {
+			for (int col=0; col<n; col++) {
+				M[row][col] = ThreadLocalRandom.current().nextInt(1, 100);
+			}
+		}
+		return M;
+	}
+	
+	static long[][] performTests(int n, int avgOf, int numTests) {
+		//Returns a (numTests)x3 matrix of each test time {{avgOfReg0, avgOfDAC0, avgOfStrass0}, {...}, ...} 
+		long[][] testTimes = new long[numTests][3];
+		for (int testNum=0; testNum < numTests; testNum++) {
+			
+			//Generate nxn matrix
+			int[][] matA = generateRandomMatrix(n);
+			int[][] matB = generateRandomMatrix(n);
+			
+			//Get average of regular matrix multiplication
+			long avgOfReg = 0;
+			for (int regTestNum=0; regTestNum < avgOf; regTestNum++) {
+				//TIMER START
+				long startTime = System.nanoTime();
+				
+				regularMM(n, matA, matB);
+				
+				//TIMER END
+				long execTime = System.nanoTime() - startTime;
+				avgOfReg += execTime;
+			}
+			avgOfReg = avgOfReg/avgOf;
+			//System.out.println("Time to execute: " + avgOfReg + " ns");
+			
+			//Get average of divide and conquer matrix multiplication
+			long avgOfDAC = 0;
+			for (int dacTestNum=0; dacTestNum < avgOf; dacTestNum++) {
+				//TIMER START
+				long startTime = System.nanoTime();
+				
+				dacMM(n, matA, matB);
+				
+				//TIMER END
+				long execTime = System.nanoTime() - startTime;
+				avgOfDAC += execTime;
+			}
+			avgOfDAC = avgOfDAC/avgOf;
+			//System.out.println("Time to execute: " + avgOfDAC + " ns");
+			
+			//Get average of strassen matrix multiplication
+			long avgOfStrass = 0;
+			for (int strassTestNum=0; strassTestNum < numTests; strassTestNum++) {
+				//TIMER START
+				long startTime = System.nanoTime();
+				
+				strassMM(n, matA, matB);
+				
+				//TIMER END
+				long execTime = System.nanoTime() - startTime;
+				avgOfStrass += execTime;
+			}
+			avgOfStrass = avgOfStrass/avgOf;
+			//System.out.println("Time to execute: " + avgOfStrass + " ns");
+			testTimes[testNum][0] = avgOfReg;
+			testTimes[testNum][1] = avgOfDAC;
+			testTimes[testNum][2] = avgOfStrass;
+		}
+		return testTimes;
+	}
+	
+	static void SaveResultsFile(long[][] testTimes, int n, int iterations) {
+		//testTimes is the (iterations)x3 array used to save time results. n is the size of the matrix to label the file
+		String fileName = new String(n + "x" + n + "_" + iterations + "its_results.csv");
+		java.io.File file = new java.io.File(fileName);
+		try {
+			if (file.createNewFile()) {
+				System.out.println(fileName + " successfully made!");
+				FileWriter fileWrite = new FileWriter(file);
+				
+				for (long[] row : testTimes) {
+					//File out here
+					fileWrite.write(row[0] + "," + row[1] + "," + row[2] + "\n");
+					//System.out.println(row[0] + ", " + row[1] + ", " + row[2]);
+				}
+				fileWrite.close();
+				System.out.println(fileName + " finished writing.");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Something went wrong creating " + fileName);
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) {
-		int[][] matA = { {3, 1,}, {1, 2} };
-		int[][] matB = { {1, 2}, {2, 4} };
+//		int[][] matA = { {3, 1,}, {1, 2} };
+//		int[][] matB = { {1, 2}, {2, 4} };
+//		
+//		int[][] fbfA = {{1, 1, 2, 2}, {2, 2, 1, 1}, {3, 3, 4, 4}, {4, 4, 3, 3} };
+//		int[][] fbfB = {{4, 4, 3, 3}, {3, 3, 4, 4}, {2, 2, 1, 1}, {1, 1, 2, 2} };
+//		
+//		int[][] tbtA = {{1, 2, 2}, {2, 1, 1}, {3, 3, 3} };
+//		int[][] tbtB = {{3, 3, 3}, {1, 1, 2}, {2, 2, 1} };
+//		
+//		System.out.println("Performing regular matrix multiplication on 3x3");
+//		printMatrix(regularMM(3, tbtA, tbtB));
+//		System.out.println("Performing regular matrix multiplication on 4x4");
+//		printMatrix(regularMM(4, fbfA, fbfB));
+//		
+//		System.out.println("Performing Divide and Conquer matrix multiplication on 3x3");
+//		printMatrix(dacMM(3, tbtA, tbtB));
+//		System.out.println("Performing Divide and Conquer matrix multiplication on 4x4");
+//		printMatrix(dacMM(4, fbfA, fbfB));
+//		
+//		System.out.println("Performing Strassen's matrix multiplication algorithm on 3x3");
+//		printMatrix(strassMM(3, tbtA, tbtB));
+//		System.out.println("Performing Strassen's matrix multiplication algorithm on 4x4");
+//		printMatrix(strassMM(4, fbfA, fbfB));
+//		
+//		System.out.println("Performing Strassen's matrix multiplication algorithm on 100x100");
+//		int[][] hbhA = generateRandomMatrix(100);
+//		int[][] hbhB = generateRandomMatrix(100);
+//		strassMM(100, hbhA, hbhB);
+//		System.out.println("Regular MM");
+//		regularMM(100, hbhA, hbhB);
 		
-		int[][] fbfA = {{1, 1, 2, 2}, {2, 2, 1, 1}, {3, 3, 4, 4}, {4, 4, 3, 3} };
-		int[][] fbfB = {{4, 4, 3, 3}, {3, 3, 4, 4}, {2, 2, 1, 1}, {1, 1, 2, 2} };
+//		int[][] tfbtfA = generateRandomMatrix(25);
+//		int[][] tfbtfB = generateRandomMatrix(25);
+//		
+//		printMatrix(regularMM(25, tfbtfA, tfbtfB));
+		int n = 2;
+		int powerOfN = n;
+		int avgOf = 20;
+		int iterations = 5;
+		while (powerOfN <= 256) {
+			long[][] testTimes = performTests(powerOfN, avgOf, iterations);
+			SaveResultsFile(testTimes, powerOfN, iterations);
+			//Multiply by self each time to get powers of n 
+			powerOfN = powerOfN * n;
+		}
+		//long[][] testTimes = performTests(32, 20, 10);
 		
-		int[][] tbtA = {{1, 2, 2}, {2, 1, 1}, {3, 3, 3} };
-		int[][] tbtB = {{3, 3, 3}, {1, 1, 2}, {2, 2, 1} };
 		
-		System.out.println("Performing regular matrix multiplication on 3x3");
-		printMatrix(regularMM(3, tbtA, tbtB));
-		System.out.println("Performing regular matrix multiplication on 4x4");
-		printMatrix(regularMM(4, fbfA, fbfB));
-		
-		System.out.println("Performing Divide and Conquer matrix multiplication on 3x3");
-		printMatrix(dacMM(3, tbtA, tbtB));
-		System.out.println("Performing Divide and Conquer matrix multiplication on 4x4");
-		printMatrix(dacMM(4, fbfA, fbfB));
-		
-		System.out.println("Performing Strassen's matrix multiplication algorithm on 3x3");
-		printMatrix(strassMM(3, tbtA, tbtB));
-		System.out.println("Performing Strassen's matrix multiplication algorithm on 4x4");
-		printMatrix(strassMM(4, fbfA, fbfB));
 		
 	}
 
