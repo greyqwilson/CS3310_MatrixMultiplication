@@ -299,25 +299,25 @@ public class MatrixMultiplication {
 			
 			//Get m1, m2, m3, m4, m5, m6, m7
 			//System.out.println("Creating m1 thru m7");
-			int[][] M1 = regularMM(n/2, AddSquareMatrix(AUL, ABR), AddSquareMatrix(BUL, BBR)); //(a11+a22)(b11+b22)
+			int[][] M1 = strassMM(n/2, AddSquareMatrix(AUL, ABR), AddSquareMatrix(BUL, BBR)); //(a11+a22)(b11+b22)
 			System.out.println("M1");
 			printMatrix(M1);
-			int[][] M2 = regularMM(n/2, AddSquareMatrix(ABL, ABR), BUL);					   //(a21+a22)b11
+			int[][] M2 = strassMM(n/2, AddSquareMatrix(ABL, ABR), BUL);					   //(a21+a22)b11
 			System.out.println("M2");
 			printMatrix(M2);
-			int[][] M3 = regularMM(n/2, AUL, SubSquareMatrix(BUR, BBR));					   //a11(b12-b22)
+			int[][] M3 = strassMM(n/2, AUL, SubSquareMatrix(BUR, BBR));					   //a11(b12-b22)
 			System.out.println("M3");
 			printMatrix(M3);
-			int[][] M4 = regularMM(n/2, ABR, SubSquareMatrix(BBL, BUL));					   //a22(b21-b11)
+			int[][] M4 = strassMM(n/2, ABR, SubSquareMatrix(BBL, BUL));					   //a22(b21-b11)
 			System.out.println("M4");
 			printMatrix(M4);
-			int[][] M5 = regularMM(n/2, AddSquareMatrix(AUL, AUR), BBR);                       //(a11+a12)b22
+			int[][] M5 = strassMM(n/2, AddSquareMatrix(AUL, AUR), BBR);                       //(a11+a12)b22
 			System.out.println("M5");
 			printMatrix(M5);
-			int[][] M6 = regularMM(n/2,	SubSquareMatrix(ABL, AUL), AddSquareMatrix(BUL, BUR)); //(a21-a11)(b11+b12)
+			int[][] M6 = strassMM(n/2,	SubSquareMatrix(ABL, AUL), AddSquareMatrix(BUL, BUR)); //(a21-a11)(b11+b12)
 			System.out.println("M6");
 			printMatrix(M6);
-			int[][] M7 = regularMM(n/2, SubSquareMatrix(AUR, ABR), AddSquareMatrix(BBL, BBR)); //(a12-a22)(b21+b22)
+			int[][] M7 = strassMM(n/2, SubSquareMatrix(AUR, ABR), AddSquareMatrix(BBL, BBR)); //(a12-a22)(b21+b22)
 			System.out.println("M7");
 			printMatrix(M7);
 			//Throw computed intermediate values into C to be 
