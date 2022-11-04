@@ -1,3 +1,14 @@
+//Author: Greyson Wilson
+//For CS3310 Analysis and Design of Algorithms (Fall 2022)
+//Professor Young
+//Project 1
+//The purpose of this program is to experimentally find out the time complexity of
+//three different matrix multiplication methods:
+//Regular matrix multiplication (GEMM), Divide-and-conquer, and Strassen's algorithm
+//Gets average of sample performance of matrices of size nxn where n is a power of 2
+//for x number of randomly generated matrices. Algorithm performance is timed and
+//saved to file for analysis.
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
@@ -29,12 +40,6 @@ public class MatrixMultiplication {
 				}
 			}
 		}
-		//Print matrix
-		//printMatrix(A);
-		//System.out.println("x");
-		//printMatrix(B);
-		//System.out.println("=");
-		//printMatrix(AB);
 		
 		return AB;
 	}
@@ -65,7 +70,6 @@ public class MatrixMultiplication {
 		
 		//Base case that matrix is 1x1
 		if (A.length == 1 && B.length == 1) {
-			//regularMM(n, A, B);
 			AB[0][0] = (A[0][0] * B[0][0]);
 			return AB;
 		}
@@ -80,7 +84,6 @@ public class MatrixMultiplication {
 			int[][] BUR = new int[n/2][n/2]; //B Upper right
 			int[][] BBL = new int[n/2][n/2]; //B Bottom left
 			int[][] BBR = new int[n/2][n/2]; //B Bottom right
-			//System.out.println("Splitting " + n + "x" + n + " matrix into " + n/2 + "x" + n/2);
 			//Assign values to each submatrix
 			//Might be able to combine for loops with matching starting/ending rows or cols
 			//Upper left
@@ -128,26 +131,8 @@ public class MatrixMultiplication {
 				i++;
 			}
 			
-				//Then call each split array
-//			System.out.println("AUL");
-//			printMatrix(AUL);
-//			System.out.println("BUL");
-//			printMatrix(BUL);
-//			System.out.println("AUR");
-//			printMatrix(AUR);
-//			System.out.println("BUR");
-//			printMatrix(BUR);
-//			System.out.println("ABL");
-//			printMatrix(ABL);
-//			System.out.println("BBL");
-//			printMatrix(BBL);
-//			System.out.println("ABR");
-//			printMatrix(ABR);
-//			System.out.println("BBR");
-//			printMatrix(BBR);
 			
 			//Delegate work to recursive calls
-			//System.out.println("Delegating work for " + n + "x" + n + " matrix...");
 			
 			int[][] CUL = AddSquareMatrix(dacMM(n/2, AUL, BUL), dacMM(n/2, AUR, BBL));
 			int[][] CUR = AddSquareMatrix(dacMM(n/2, AUL, BUR), dacMM(n/2, AUR, BBR));
@@ -155,7 +140,6 @@ public class MatrixMultiplication {
 			int[][] CBR = AddSquareMatrix(dacMM(n/2, ABL, BUR), dacMM(n/2, ABR, BBR));
 			
 			//Combine all of their work
-			//System.out.println("Combining returned arrays from recursive calls");
 			int[][] C = new int[n][n];
 			
 			//Fill in C's quadrants
@@ -171,7 +155,6 @@ public class MatrixMultiplication {
 				c_col = 0;
 				c_row++;
 			}
-			//System.out.println("Finished filling in CUL " + c_row);
 			//Copy into Bottom Left of C
 			for (int row=0; row<n/2; row++) {
 				for (int col=0; col<n/2; col++) {
@@ -203,7 +186,6 @@ public class MatrixMultiplication {
 				c_col = n/2;
 				c_row++;
 			}
-			//System.out.println("Returning!");
 			
 			return C;
 		}
@@ -212,9 +194,8 @@ public class MatrixMultiplication {
 	public static int[][] strassMM(int n, int[][] A, int[][] B) {
 
 		
-		//Base case that matrix is 2x2 or 1x1
-		if (A.length <= 2 && B.length <= 2) {
-			//System.out.println("Base case reached");
+		//Base case that matrix is 1x1
+		if (A.length == 1 && B.length == 1) {
 			return regularMM(n, A, B); //If base case is 2x2
 		}
 		
@@ -237,17 +218,14 @@ public class MatrixMultiplication {
 				}
 				A = resizedA;
 				B = resizedB;
-				//System.out.println("Resizing matrix from " + n + "x" + n + " to " + (n+1) + "x" + (n+1) );
 				n += 1;
-				//printMatrix(A); //---------------DEBUG
-				//printMatrix(B);
+
 			}
 			
 			int[][] C = new int[n][n];
 			
 			//Divide matrices		
 			//Make 4 submatrices for A and B
-			//System.out.println("Still too big to solve easily. Splitting A and B into submatrices");
 			int[][] AUL = new int[n/2][n/2]; //A Upper left
 			int[][] AUR = new int[n/2][n/2]; //A Upper right
 			int[][] ABL = new int[n/2][n/2]; //A Bottom left
@@ -305,44 +283,22 @@ public class MatrixMultiplication {
 			}
 			
 			//Get m1, m2, m3, m4, m5, m6, m7
-			//System.out.println("Creating m1 thru m7");
-			int[][] M1 = regularMM(n/2, AddSquareMatrix(AUL, ABR), AddSquareMatrix(BUL, BBR)); //(a11+a22)(b11+b22)
-			//System.out.println("M1");
-			//printMatrix(M1);
-			int[][] M2 = regularMM(n/2, AddSquareMatrix(ABL, ABR), BUL);					   //(a21+a22)b11
-			//System.out.println("M2");
-			//printMatrix(M2);
-			int[][] M3 = regularMM(n/2, AUL, SubSquareMatrix(BUR, BBR));					   //a11(b12-b22)
-			//System.out.println("M3");
-			//printMatrix(M3);
-			int[][] M4 = regularMM(n/2, ABR, SubSquareMatrix(BBL, BUL));					   //a22(b21-b11)
-			//System.out.println("M4");
-			//printMatrix(M4);
-			int[][] M5 = regularMM(n/2, AddSquareMatrix(AUL, AUR), BBR);                       //(a11+a12)b22
-			//System.out.println("M5");
-			//printMatrix(M5);
-			int[][] M6 = regularMM(n/2,	SubSquareMatrix(ABL, AUL), AddSquareMatrix(BUL, BUR)); //(a21-a11)(b11+b12)
-			//System.out.println("M6");
-			//printMatrix(M6);
-			int[][] M7 = regularMM(n/2, SubSquareMatrix(AUR, ABR), AddSquareMatrix(BBL, BBR)); //(a12-a22)(b21+b22)
-			//System.out.println("M7");
-			//printMatrix(M7);
+			int[][] M1 = strassMM(n/2, AddSquareMatrix(AUL, ABR), AddSquareMatrix(BUL, BBR)); //(a11+a22)(b11+b22)
+			int[][] M2 = strassMM(n/2, AddSquareMatrix(ABL, ABR), BUL);					   //(a21+a22)b11
+			int[][] M3 = strassMM(n/2, AUL, SubSquareMatrix(BUR, BBR));					   //a11(b12-b22)
+			int[][] M4 = strassMM(n/2, ABR, SubSquareMatrix(BBL, BUL));					   //a22(b21-b11)
+			int[][] M5 = strassMM(n/2, AddSquareMatrix(AUL, AUR), BBR);                       //(a11+a12)b22
+			int[][] M6 = strassMM(n/2,	SubSquareMatrix(ABL, AUL), AddSquareMatrix(BUL, BUR)); //(a21-a11)(b11+b12)
+			int[][] M7 = strassMM(n/2, SubSquareMatrix(AUR, ABR), AddSquareMatrix(BBL, BBR)); //(a12-a22)(b21+b22)
+
 			//Throw computed intermediate values into C to be 
 			//[C11,C12] Where C could be some 2x2, 4x4, or any other even length square matrix
 			//[C21,C22]
-			//System.out.println("Making " + n + "x" + n + " C matrix");
 			int[][] CUL = AddSquareMatrix(SubSquareMatrix(M1, M5), AddSquareMatrix(M4, M7));
-			//System.out.println("CUL");
-			//printMatrix(CUL);
 			int[][] CUR = AddSquareMatrix(M3, M5);
-			//System.out.println("CUR");
-			//printMatrix(CUR);
 			int[][] CBL = AddSquareMatrix(M2, M4);
-			//System.out.println("CBL");
-			//printMatrix(CBL);
 			int[][] CBR = AddSquareMatrix(SubSquareMatrix(M1, M2), AddSquareMatrix(M3, M6));
-			//System.out.println("CBR");
-			//printMatrix(CBR);
+
 			//Copy C submatrices into C
 			int c_row = 0;
 			int c_col = 0;
@@ -386,8 +342,6 @@ public class MatrixMultiplication {
 				c_col = n/2;
 				c_row++;
 			}
-			
-			//System.out.println("Returning C");
 
 			return C;
 		}
@@ -407,11 +361,7 @@ public class MatrixMultiplication {
 				C[row][col] = A[row][col] + B[row][col];
 			}
 		}
-		//printMatrix(A);
-		//System.out.println(" + ");
-		//printMatrix(B);
-		//System.out.println(" = ");
-		//printMatrix(C);
+
 		return C;
 	}
 	
@@ -429,11 +379,7 @@ public class MatrixMultiplication {
 						C[row][col] = A[row][col] - B[row][col];
 					}
 				}
-				//printMatrix(A);
-				//System.out.println(" - ");
-				//printMatrix(B);
-				//System.out.println(" = ");
-				//printMatrix(C);
+
 				return C;
 	}
 	
@@ -469,8 +415,7 @@ public class MatrixMultiplication {
 				avgOfReg += execTime;
 			}
 			avgOfReg = avgOfReg/avgOf;
-			//System.out.println("Time to execute: " + avgOfReg + " ns");
-			
+
 			//Get average of divide and conquer matrix multiplication
 			long avgOfDAC = 0;
 			for (int dacTestNum=0; dacTestNum < avgOf; dacTestNum++) {
@@ -484,8 +429,7 @@ public class MatrixMultiplication {
 				avgOfDAC += execTime;
 			}
 			avgOfDAC = avgOfDAC/avgOf;
-			//System.out.println("Time to execute: " + avgOfDAC + " ns");
-			
+
 			//Get average of strassen matrix multiplication
 			long avgOfStrass = 0;
 			for (int strassTestNum=0; strassTestNum < numTests; strassTestNum++) {
@@ -499,7 +443,7 @@ public class MatrixMultiplication {
 				avgOfStrass += execTime;
 			}
 			avgOfStrass = avgOfStrass/avgOf;
-			//System.out.println("Time to execute: " + avgOfStrass + " ns");
+
 			testTimes[testNum][0] = avgOfReg;
 			testTimes[testNum][1] = avgOfDAC;
 			testTimes[testNum][2] = avgOfStrass;
@@ -519,7 +463,6 @@ public class MatrixMultiplication {
 				for (long[] row : testTimes) {
 					//File out here
 					fileWrite.write(row[0] + "," + row[1] + "," + row[2] + "\n");
-					//System.out.println(row[0] + ", " + row[1] + ", " + row[2]);
 				}
 				fileWrite.close();
 				System.out.println(fileName + " finished writing.");
@@ -532,54 +475,17 @@ public class MatrixMultiplication {
 	}
 	
 	public static void main(String[] args) {
-//		int[][] matA = { {3, 1,}, {1, 2} };
-//		int[][] matB = { {1, 2}, {2, 4} };
-//		
-//		int[][] fbfA = {{1, 1, 2, 2}, {2, 2, 1, 1}, {3, 3, 4, 4}, {4, 4, 3, 3} };
-//		int[][] fbfB = {{4, 4, 3, 3}, {3, 3, 4, 4}, {2, 2, 1, 1}, {1, 1, 2, 2} };
-//		
-//		int[][] tbtA = {{1, 2, 2}, {2, 1, 1}, {3, 3, 3} };
-//		int[][] tbtB = {{3, 3, 3}, {1, 1, 2}, {2, 2, 1} };
-//		
-//		System.out.println("Performing regular matrix multiplication on 3x3");
-//		printMatrix(regularMM(3, tbtA, tbtB));
-//		System.out.println("Performing regular matrix multiplication on 4x4");
-//		printMatrix(regularMM(4, fbfA, fbfB));
-//		
-//		System.out.println("Performing Divide and Conquer matrix multiplication on 3x3");
-//		printMatrix(dacMM(3, tbtA, tbtB));
-//		System.out.println("Performing Divide and Conquer matrix multiplication on 4x4");
-//		printMatrix(dacMM(4, fbfA, fbfB));
-//		
-//		System.out.println("Performing Strassen's matrix multiplication algorithm on 3x3");
-//		printMatrix(strassMM(3, tbtA, tbtB));
-//		System.out.println("Performing Strassen's matrix multiplication algorithm on 4x4");
-//		printMatrix(strassMM(4, fbfA, fbfB));
-//		
-//		System.out.println("Performing Strassen's matrix multiplication algorithm on 100x100");
-//		int[][] hbhA = generateRandomMatrix(100);
-//		int[][] hbhB = generateRandomMatrix(100);
-//		strassMM(100, hbhA, hbhB);
-//		System.out.println("Regular MM");
-//		regularMM(100, hbhA, hbhB);
-		
-//		int[][] tfbtfA = generateRandomMatrix(25);
-//		int[][] tfbtfB = generateRandomMatrix(25);
-//		
-//		printMatrix(regularMM(25, tfbtfA, tfbtfB));
+
 		int n = 2;
-		int powerOfN = n;
+		int powerOfN = 2;
 		int avgOf = 20;
-		int iterations = 5;
+		int iterations = 1000;
 		while (powerOfN <= 256) {
 			long[][] testTimes = performTests(powerOfN, avgOf, iterations);
 			SaveResultsFile(testTimes, powerOfN, iterations);
 			//Multiply by self each time to get powers of n 
 			powerOfN = powerOfN * n;
 		}
-		//long[][] testTimes = performTests(32, 20, 10);
-		
-		
 		
 	}
 
